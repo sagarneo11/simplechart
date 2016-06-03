@@ -3,18 +3,19 @@ import { connect } from 'react-redux';
 import NVD3Chart from 'react-nvd3';
 import update from 'react-addons-update';
 
-class PieChart extends Component {
+class StackedAreaChart extends Component {
 
   constructor() {
     super();
     this.defaultOptions = {
-      type: 'pieChart',
+      type: 'stackedAreaChart',
       height: 400,
-      x: (d) => d.label,
-      y: (d) => d.value,
-      showLegend: false,
-      showLabels: false,
+      useInteractiveGuidline: true,
     };
+  }
+
+  componentWillMount() {
+    this.setState({ data: this.props.data });
   }
 
   render() {
@@ -24,7 +25,7 @@ class PieChart extends Component {
     });
 
     // Add chart data
-    args.datum = this.props.data;
+    args.datum = this.state.data;
 
     return (
       <div>
@@ -34,11 +35,11 @@ class PieChart extends Component {
   }
 }
 
-PieChart.propTypes = {
+StackedAreaChart.propTypes = {
   data: React.PropTypes.array,
   options: React.PropTypes.object,
 };
 
 // Redux connection
 
-export default connect()(PieChart);
+export default connect()(StackedAreaChart);
