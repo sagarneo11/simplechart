@@ -1,12 +1,14 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
-import { appComponent } from '../../css/components.css';
+import AppComponent from '../Layout/AppComponent';
 import * as styles from './DataInput.css';
-import { RECEIVE_RAW_DATA } from '../../constants';
+import { RECEIVE_RAW_DATA, UPDATE_CURRENT_STEP } from '../../constants';
 import { sampleData } from '../../constants/sampleData';
 import actionTrigger from '../../actions';
+import { Heading, Select, Button, Text } from 'rebass';
+import { ListBlock } from '../Layout/RebassComponents';
 
-class DataInput extends Component {
+class DataInput extends AppComponent {
 
   constructor() {
     super();
@@ -14,13 +16,16 @@ class DataInput extends Component {
     this._updateValue = this._updateValue.bind(this);
     this._updateValue = this._updateValue.bind(this);
     this._loadSampleData = this._loadSampleData.bind(this);
+    this._setSampleDataSet = this._setSampleDataSet.bind(this);
+
     this.state = {
       rawData: '',
+      sampleDataSet: 0,
     };
     this.inputRules = [
-      'Enter comma or tab delimited text here.',
+      'Enter comma-delimited text here.',
       'A header row is required.',
-      'The label for each row must be in the first column.',
+      'See sample data sets for formatting examples',
     ];
   }
 
@@ -30,6 +35,13 @@ class DataInput extends Component {
 
   componentWillReceiveProps(nextProps) {
     this.setState({ rawData: nextProps.rawData });
+    if (nextProps.dataStatus &&
+      nextProps.dataStatus.status && nextProps.dataStatus.status === 'success'
+    ) {
+      this.props.dispatch(
+        actionTrigger(UPDATE_CURRENT_STEP, 1)
+      );
+    }
   }
 
   _submitData() {
@@ -42,16 +54,31 @@ class DataInput extends Component {
     this.setState({ rawData: evt.target.value });
   }
 
-  _loadSampleData(evt) {
-    const sampleIndex = parseInt(evt.target.getAttribute('data-key'), 10);
-    if (!isNaN(sampleIndex) && sampleData[sampleIndex]) {
-      this.setState({ rawData: sampleData[sampleIndex].data });
+  _loadSampleData() {
+    this.setState({ rawData: sampleData[this.state.sampleDataSet].data });
+  }
+
+  _sampleDataOptions() {
+    function getOpt(set, i) {
+      return {
+        children: set.label,
+        value: i,
+      };
     }
+    return sampleData.map((set, i) =>
+      getOpt(set, i)
+    );
+  }
+
+  _setSampleDataSet(evt) {
+    this.setState({
+      sampleDataSet: evt.target.value,
+    });
   }
 
   render() {
     let dataStatus = 'Waiting for data input';
-    let dataStatusClass = 'default';
+    let dataStatusClass = 'initial';
 
     if (this.props.dataStatus) {
       if (this.props.dataStatus.message) {
@@ -64,26 +91,9 @@ class DataInput extends Component {
     }
 
     return (
-      <div className={appComponent}>
-        <ul>
-          {this.inputRules.map((rule, i) =>
-            (<li key={i}>{rule}</li>)
-          )}
-        </ul>
-        <p>Sample data sets:</p>
-        <ul>
-          {sampleData.map((sample, i) =>
-            (<li key={i}>
-              <a
-                onClick={this._loadSampleData}
-                data-key={i}
-                href="#0"
-              >
-                {sample.label}
-              </a>
-            </li>)
-          )}
-        </ul>
+      <div className={this.styles.appComponent}>
+        <Heading level={2}>Input CSV Data</Heading>
+        <ListBlock list={this.inputRules} />
         <textarea
           id="DataInput"
           className={styles.textarea}
@@ -91,10 +101,34 @@ class DataInput extends Component {
           onChange={this._updateValue}
           ref="dataInput"
         />
-        <button onClick={this._submitData}>Go</button>
-        <span className={styles[dataStatusClass]}>
-          {dataStatus}
-        </span>
+
+        <div className={styles.actionsContainer}>
+          <div className={styles.sampleDataContainer}>
+            <Select
+              className={styles.sampleDataContainer.Select}
+              style={{ marginBottom: 0 }}
+              label="Use sample data"
+              name="sample-data-select"
+              options={this._sampleDataOptions()}
+              onChange={this._setSampleDataSet}
+            />
+            <Button
+              theme="secondary"
+              onClick={this._loadSampleData}
+            >Load</Button>
+          </div>
+
+          <div className={styles.submitContainer}>
+            <Button
+              theme="primary"
+              big
+              onClick={this._submitData}
+            >Submit</Button>
+            <span className={`${styles.dataStatus} ${styles[dataStatusClass]}`}>
+              <Text small>{dataStatus}</Text>
+            </span>
+          </div>
+        </div>
       </div>
     );
   }
