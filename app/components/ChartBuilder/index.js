@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import Chart from '../Chart/';
 import ChartTypeSelector from '../ChartTypeSelector/';
 import ChartMetadata from '../ChartMetadata/';
+import PalettePicker from '../PalettePicker/';
 import ChartOptions from '../ChartOptions/';
 import AppComponent from '../Layout/AppComponent';
 import ErrorMessage from '../../utils/ErrorMessage';
@@ -17,7 +18,7 @@ class ChartBuilder extends AppComponent {
     switch (step) {
       case 1:
         subcomponent = React.createElement(ChartTypeSelector, {
-          data: this.props.state.parsedData,
+          transformedData: this.props.state.transformedData,
           fields: this.props.state.dataFields,
           type: this.props.state.chartOptions.type || '',
         });
@@ -30,8 +31,14 @@ class ChartBuilder extends AppComponent {
         break;
 
       case 3:
-        subcomponent = React.createElement(ChartOptions, {
+        subcomponent = React.createElement(PalettePicker, {
           data: this.props.state.chartData,
+          options: this.props.state.chartOptions,
+        });
+        break;
+
+      case 4:
+        subcomponent = React.createElement(ChartOptions, {
           options: this.props.state.chartOptions,
         });
         break;
@@ -51,11 +58,20 @@ class ChartBuilder extends AppComponent {
             {this._renderSubcomponent(this.props.state.currentStep)}
           </div>
           <div className={styles.chartContainer}>
+            <h3>{this.props.state.chartMetadata.title}</h3>
             <Chart
               data={this.props.state.chartData}
               options={this.props.state.chartOptions}
-              metadata={this.props.state.chartMetadata}
+              widget={false}
             />
+          <p>{this.props.state.chartMetadata.caption}</p>
+
+          {this.props.state.chartMetadata.credit ?
+            (<p className={styles.credit}>
+              Credit: {this.props.state.chartMetadata.credit}
+            </p>) :
+            ''
+          }
           </div>
         </div>
       </div>

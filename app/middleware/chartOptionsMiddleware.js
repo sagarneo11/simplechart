@@ -12,12 +12,12 @@ export default function chartOptionsMiddleware() {
     // apply default D3 palette if none provided
     if (!store.data.color) {
       store.data.color = defaultPalette;
+      next(actionTrigger(
+        RECEIVE_CHART_OPTIONS,
+        store.data
+      ));
     }
 
-    next(actionTrigger(
-      RECEIVE_CHART_OPTIONS,
-      store.data
-    ));
     return store;
   };
 }
