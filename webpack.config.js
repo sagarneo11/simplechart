@@ -9,7 +9,7 @@ var postcssCalc = require('postcss-calc');
 var postcssLost = require('lost');
 var stylelint = require('stylelint');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var WebpackGitHash = require('./webpack-git-hash');
+var WebpackGitHash = require('webpack-git-hash');
 var updateVersion = require('./updateVersion');
 
 var entry = {
@@ -42,7 +42,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'static'),
     publicPath: '/static/',
-    filename: '[name].[githash].js'
+    filename: process.env.DEVELOPMENT ? '[name].js' : '[name].[githash].js'
   },
   plugins: plugins,
   postcss: function(webpack) {
